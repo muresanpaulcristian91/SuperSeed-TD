@@ -360,48 +360,6 @@ function formatTime(seconds) {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Function to load the leaderboard from localStorage
-function loadLeaderboard() {
-    const leaderboard = localStorage.getItem('leaderboard');
-    return leaderboard ? JSON.parse(leaderboard) : [];
-}
-
-// Function to save the leaderboard to localStorage
-function saveLeaderboard(leaderboard) {
-    localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-}
-
-// Function to update the leaderboard with the player's score
-function updateLeaderboard(username, survivalTime) {
-    const leaderboard = loadLeaderboard();
-    leaderboard.push({ username, survivalTime });
-    leaderboard.sort((a, b) => b.survivalTime - a.survivalTime);
-    const top10 = leaderboard.slice(0, 10);
-    saveLeaderboard(top10);
-    return top10;
-}
-
-// Function to display the leaderboard in the given table body
-function displayLeaderboard(tableBodyId) {
-    const leaderboard = loadLeaderboard();
-    const tbody = document.getElementById(tableBodyId);
-    if (!tbody) {
-        console.error(`Leaderboard table body with ID ${tableBodyId} not found`);
-        return;
-    }
-    tbody.innerHTML = '';
-
-    leaderboard.forEach((entry, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${entry.username}</td>
-            <td>${formatTime(entry.survivalTime)}</td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
 function loadImages() {
     const imagesToLoad = [
         { src: 'img/gameMap.png', image: backgroundImage },
@@ -418,12 +376,18 @@ function loadImages() {
                 image: img
             }))
         ),
-        ...enemyK1Images.map((img, i) => ({ src: `img/_K1_WALK_00${i}.png`, image: img })),
-        ...enemyK2Images.map((img, i) => ({ src: `img/_K2_WALK_00${i}.png`, image: img })),
-        ...enemyK3Images.map((img, i) => ({ src: `img/_K3_WALK_00${i}.png`, image: img })),
-        ...enemyK4Images.map((img, i) => ({ src: `img/_K4_WALK_00${i}.png`, image: img })),
-        ...enemyK5Images.map((img, i) => ({ src: `img/_K5_WALK_00${i}.png`, image: img })),
-        ...enemyK6Images.map((img, i) => ({ src: `img/_K6_WALK_00${i}.png`, image: img }))
+        ...enemyK1Images.map((img, i) => ({ src: `img/K1_WALK_00${i}.png`, image: img })),
+        ...enemyK2Images.map((img, i) => ({ src: `img/K2_WALK_00${i}.png`, image: img })),
+        ...enemyK3Images.map((img, i) => ({ src: `img/K3_WALK_00${i}.png`, image: img })),
+        ...enemyK4Images.map((img, i) => ({ src: `img/K4_WALK_00${i}.png`, image: img })),
+        ...enemyK5Images.map((img, i) => ({ src: `img/K5_WALK_00${i}.png`, image: img })),
+        ...enemyK6Images.map((img, i) => ({ src: `img/K6_WALK_00${i}.png`, image: img })),
+        ...enemyK7Images.map((img, i) => ({ src: `img/K7_WALK_00${i}.png`, image: img })),
+        ...enemyK8Images.map((img, i) => ({ src: `img/K8_WALK_00${i}.png`, image: img })),
+        ...enemyK9Images.map((img, i) => ({ src: `img/K9_WALK_00${i}.png`, image: img })),
+        ...enemyK10Images.map((img, i) => ({ src: `img/K10_WALK_00${i}.png`, image: img })),
+        ...enemyK11Images.map((img, i) => ({ src: `img/K11_WALK_00${i}.png`, image: img })),
+        ...enemyK12Images.map((img, i) => ({ src: `img/K12_WALK_00${i}.png`, image: img }))
     ];
 
     let loadedImages = 0;
@@ -1193,379 +1157,524 @@ function animate(timestamp) {
 
                 if (hearts <= 0) {
                     gameOver();
-            }
-        }
-
-        for (let i = buildings.length - 1; i >= 0; i--) {
-            const building = buildings[i];
-            building.update();
-
-            for (let j = building.projectiles.length - 1; j >= 0; j--) {
-                const projectile = building.projectiles[j];
-                projectile.update();
-
-                if (!enemies.includes(projectile.enemy)) {
-                    console.log(`Enemy for projectile ${j} no longer exists, removing projectile`);
-                    building.projectiles.splice(j, 1);
-                    continue;
                 }
+            }
 
-                if (projectile.hasHit) {
-                    const enemiesToRemove = [];
+            for (let i = buildings.length - 1; i >= 0; i--) {
+                const building = buildings[i];
+                building.update();
 
-                    if (projectile.power > 0) {
-                        if (projectile.splash) {
-                            console.log('Applying splash damage with radius 100');
-                            enemies.forEach((enemy) => {
-                                const dx = enemy.center.x - projectile.position.x;
-                                const dy = enemy.center.y - projectile.position.y;
-                                const splashDistance = Math.sqrt(dx * dx + dy * dy);
-                                if (splashDistance < 100) {
-                                    console.log(`Splash hit enemy at distance ${splashDistance}, dealing ${projectile.power} damage`);
-                                    enemy.health -= projectile.power;
-                                    console.log(`Enemy health after splash damage: ${enemy.health}`);
-                                    if (enemy.health <= 0) {
-                                        enemiesToRemove.push(enemy);
+                for (let j = building.projectiles.length - 1; j >= 0; j--) {
+                    const projectile = building.projectiles[j];
+                    projectile.update();
+
+                    if (!enemies.includes(projectile.enemy)) {
+                        console.log(`Enemy for projectile ${j} no longer exists, removing projectile`);
+                        building.projectiles.splice(j, 1);
+                        continue;
+                    }
+
+                    if (projectile.hasHit) {
+                        const enemiesToRemove = [];
+
+                        if (projectile.power > 0) {
+                            if (projectile.splash) {
+                                console.log('Applying splash damage with radius 100');
+                                enemies.forEach((enemy) => {
+                                    const dx = enemy.center.x - projectile.position.x;
+                                    const dy = enemy.center.y - projectile.position.y;
+                                    const splashDistance = Math.sqrt(dx * dx + dy * dy);
+                                    if (splashDistance < 100) {
+                                        console.log(`Splash hit enemy at distance ${splashDistance}, dealing ${projectile.power} damage`);
+                                        enemy.health -= projectile.power;
+                                        console.log(`Enemy health after splash damage: ${enemy.health}`);
+                                        if (enemy.health <= 0) {
+                                            enemiesToRemove.push(enemy);
+                                        }
                                     }
-                                }
-                            });
+                                });
 
-                            enemiesToRemove.forEach((enemy) => {
-                                const index = enemies.indexOf(enemy);
-                                if (index > -1) {
-                                    const reward = calculateCoinReward(projectile, enemy.reward || 5);
-                                    enemies.splice(index, 1);
-                                    coins += reward;
-                                    console.log(`Enemy killed by splash, adding ${reward} coins. Total coins: ${coins}`);
-                                    const coinsElement = document.querySelector('#coins');
-                                    if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
-                                }
-                            });
-                        } else {
-                            console.log(`Applying single-target damage: ${projectile.power} to enemy with health ${projectile.enemy.health}`);
-                            projectile.enemy.health -= projectile.power;
-                            console.log(`Enemy health after single-target damage: ${projectile.enemy.health}`);
-                            if (projectile.enemy.health <= 0) {
-                                const index = enemies.indexOf(projectile.enemy);
-                                if (index > -1) {
-                                    const reward = calculateCoinReward(projectile, projectile.enemy.reward || 5);
-                                    enemies.splice(index, 1);
-                                    coins += reward;
-                                    console.log(`Enemy killed by ${building.towerType.name}, adding ${reward} coins. Total coins: ${coins}`);
-                                    const coinsElement = document.querySelector('#coins');
-                                    if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
+                                enemiesToRemove.forEach((enemy) => {
+                                    const index = enemies.indexOf(enemy);
+                                    if (index > -1) {
+                                        const reward = calculateCoinReward(projectile, enemy.reward || 5);
+                                        enemies.splice(index, 1);
+                                        coins += reward;
+                                        console.log(`Enemy killed by splash, adding ${reward} coins. Total coins: ${coins}`);
+                                        const coinsElement = document.querySelector('#coins');
+                                        if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
+                                    }
+                                });
+                            } else {
+                                console.log(`Applying single-target damage: ${projectile.power} to enemy with health ${projectile.enemy.health}`);
+                                projectile.enemy.health -= projectile.power;
+                                console.log(`Enemy health after single-target damage: ${projectile.enemy.health}`);
+                                if (projectile.enemy.health <= 0) {
+                                    const index = enemies.indexOf(projectile.enemy);
+                                    if (index > -1) {
+                                        const reward = calculateCoinReward(projectile, projectile.enemy.reward || 5);
+                                        enemies.splice(index, 1);
+                                        coins += reward;
+                                        console.log(`Enemy killed by ${building.towerType.name}, adding ${reward} coins. Total coins: ${coins}`);
+                                        const coinsElement = document.querySelector('#coins');
+                                        if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (projectile.slowFactor && projectile.slowDuration) {
-                        console.log(`Applying slow effect: factor ${projectile.slowFactor}, duration ${projectile.slowDuration}`);
-                        projectile.enemy.applySlow(projectile.slowFactor, projectile.slowDuration);
-                    }
+                        if (projectile.slowFactor && projectile.slowDuration) {
+                            console.log(`Applying slow effect: factor ${projectile.slowFactor}, duration ${projectile.slowDuration}`);
+                            projectile.enemy.applySlow(projectile.slowFactor, projectile.slowDuration);
+                        }
 
-                    console.log(`Removing projectile ${j} after hit`);
-                    building.projectiles.splice(j, 1);
-                    continue;
-                }
-            }
-        }
-
-        placementTiles.forEach((tile) => {
-            tile.update(mouse);
-        });
-
-        if (activeTile && !activeTile.isOccupied && !menuOpen) {
-            let canPlace = true;
-            for (let dx = 0; dx < 2; dx++) {
-                for (let dy = 0; dy < 2; dy++) {
-                    const tileX = activeTile.position.x + dx * 64;
-                    const tileY = activeTile.position.y + dy * 64;
-                    const tile = placementTiles.find(
-                        t => t.position.x === tileX && t.position.y === tileY
-                    );
-                    if (!tile || tile.isOccupied) {
-                        canPlace = false;
-                        break;
-                    }
-                }
-                if (!canPlace) break;
-            }
-
-            for (let dx = 0; dx < 2; dx++) {
-                for (let dy = 0; dy < 2; dy++) {
-                    const tileX = activeTile.position.x + dx * 64;
-                    const tileY = activeTile.position.y + dy * 64;
-                    const tile = placementTiles.find(
-                        t => t.position.x === tileX && t.position.y === tileY
-                    );
-                    if (tile && !tile.isOccupied) {
-                        c.fillStyle = canPlace ? 'rgba(255, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';
-                        c.fillRect(tile.position.x, tile.position.y, tile.size, tile.size);
-                    }
-                }
-            }
-        }
-
-        drawMenu();
-        drawSelectedBuilding();
-
-        let hoveredBuilding = null;
-        buildings.forEach((building) => {
-            if (building.isHovered(mouse.x, mouse.y)) {
-                hoveredBuilding = building;
-            }
-        });
-
-        if (hoveredBuilding) {
-            activeTile = null;
-
-            c.fillStyle = 'rgba(255, 255, 0, 0.2)';
-            c.fillRect(
-                hoveredBuilding.adjustedPosition.x,
-                hoveredBuilding.adjustedPosition.y,
-                hoveredBuilding.width,
-                hoveredBuilding.height
-            );
-
-            const isNewSuperSeedTower = hoveredBuilding.towerType.name === 'SuperSeedTower';
-            const isSlowTower = hoveredBuilding.towerType.name === 'SlowTower';
-            const tooltipWidth = 180;
-            const tooltipHeight = (hoveredBuilding.slowFactor ? 90 : 60) + (isNewSuperSeedTower ? 15 : 0) + (isSlowTower ? 15 : 0);
-            const tooltipX = hoveredBuilding.adjustedPosition.x + hoveredBuilding.width / 2 - tooltipWidth / 2;
-            let tooltipY = hoveredBuilding.adjustedPosition.y - tooltipHeight - 20;
-            if (tooltipY < 0) {
-                tooltipY = hoveredBuilding.adjustedPosition.y + hoveredBuilding.height + 20;
-            }
-
-            c.fillStyle = 'rgba(0, 0, 0, 0.9)';
-            c.fillRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
-
-            c.strokeStyle = 'white';
-            c.lineWidth = 1;
-            c.strokeRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
-
-            c.fillStyle = 'white';
-            c.font = '16px Changa One';
-            c.textAlign = 'left';
-            let yOffset = 20;
-
-            c.fillText(`Damage: ${hoveredBuilding.damage}`, tooltipX + 8, tooltipY + yOffset);
-            yOffset += 15;
-
-            if (hoveredBuilding.slowFactor) {
-                const slowPercentage = ((1 - hoveredBuilding.slowFactor) * 100).toFixed(0);
-                c.fillText(`Slow: ${slowPercentage}%`, tooltipX + 8, tooltipY + yOffset);
-                yOffset += 15;
-            }
-
-            if (isSlowTower) {
-                const numProjectiles = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 4 : 6;
-                c.fillText(`Projectiles: ${numProjectiles}`, tooltipX + 8, tooltipY + yOffset);
-                yOffset += 15;
-            }
-
-            c.fillText(`Type: ${hoveredBuilding.getDamageType()}`, tooltipX + 8, tooltipY + yOffset);
-            yOffset += 15;
-            c.fillText(`Fire Rate: ${(1000 / hoveredBuilding.fireRate).toFixed(2)} shots/s`, tooltipX + 8, tooltipY + yOffset);
-            if (isNewSuperSeedTower) {
-                const multiplier = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 3 : 4;
-                yOffset += 15;
-                c.fillText(`Coin Multiplier: ${multiplier}x`, tooltipX + 8, tooltipY + yOffset);
-            }
-            c.textAlign = 'start';
-        }
-
-        const currentTime = Date.now();
-        var timeSinceLastWave = currentTime - lastWaveTime;
-        survivalTime = Math.floor((currentTime - startTime) / 1000);
-        const timerElement = document.querySelector('#timer');
-        if (timerElement) timerElement.innerHTML = formatTime(survivalTime);
-
-        if (timeSinceLastWave >= waveInterval) {
-            totalWaveCount++; // Increment total wave count (includes regular and boss waves)
-
-            if (waveNumber >= 12 && !isBossWaveNext && !isNeverEndingWave) {
-                // After wave 12 (EnemyK12), the next wave is a boss wave (Boss4)
-                if (isBossWaveNext) {
-                    spawnBoss();
-                    isBossWaveNext = false; // Reset for the next regular wave
-                } else {
-                    waveNumber++; // Increment regular wave count to 13
-                    const enemyCount = calculateEnemyCount(waveNumber);
-                    spawnEnemies(enemyCount);
-                    if (waveNumber % 3 === 0) {
-                        isBossWaveNext = true;
-                    }
-                }
-
-                // Check if we've just finished the boss wave after wave 12 (Boss4)
-                if (waveNumber > 12 && !isBossWaveNext) {
-                    isNeverEndingWave = true; // Start the never-ending wave
-                    waveNotification = "Never-Ending Wave! Survive as long as you can!";
-                    waveNotificationTimer = 0;
-                    console.log("Starting never-ending wave after Boss4");
-                }
-            } else if (!isNeverEndingWave) {
-                if (isBossWaveNext) {
-                    spawnBoss();
-                    isBossWaveNext = false;
-                } else {
-                    waveNumber++;
-                    const enemyCount = calculateEnemyCount(waveNumber);
-                    spawnEnemies(enemyCount);
-                    if (waveNumber % 3 === 0) {
-                        isBossWaveNext = true;
+                        console.log(`Removing projectile ${j} after hit`);
+                        building.projectiles.splice(j, 1);
+                        continue;
                     }
                 }
             }
 
-            lastWaveTime = currentTime;
-            console.log(`Wave interval: ${waveInterval / 1000} seconds, Time since last wave: ${timeSinceLastWave / 1000} seconds`);
-        }
-
-        // Handle continuous spawning for the never-ending wave
-        if (isNeverEndingWave) {
-            neverEndingSpawnTimer += deltaTime * 1000; // Increment timer based on frame time
-            if (neverEndingSpawnTimer >= neverEndingSpawnInterval) {
-                const enemy = spawnEndlessEnemies();
-                if (enemy) {
-                    enemies.push(enemy);
-                    enemies.sort((a, b) => a.position.y - b.position.y);
-                }
-                neverEndingSpawnTimer = 0; // Reset timer
-            }
-        }
-    }
-
-    else {
-        enemies.forEach(enemy => {
-            enemy.draw();
-        });
-
-        buildings.forEach(building => {
-            building.draw();
-            building.projectiles.forEach(projectile => {
-                projectile.draw();
+            placementTiles.forEach((tile) => {
+                tile.update(mouse);
             });
-        });
 
-        c.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        c.fillRect(0, 0, canvas.width, canvas.height);
-    }
+            if (activeTile && !activeTile.isOccupied && !menuOpen) {
+                let canPlace = true;
+                for (let dx = 0; dx < 2; dx++) {
+                    for (let dy = 0; dy < 2; dy++) {
+                        const tileX = activeTile.position.x + dx * 64;
+                        const tileY = activeTile.position.y + dy * 64;
+                        const tile = placementTiles.find(
+                            t => t.position.x === tileX && t.position.y === tileY
+                        );
+                        if (!tile || tile.isOccupied) {
+                            canPlace = false;
+                            break;
+                        }
+                    }
+                    if (!canPlace) break;
+                }
 
-    if (waveNotification) {
-        waveNotificationTimer += deltaTime * 1000;
+                for (let dx = 0; dx < 2; dx++) {
+                    for (let dy = 0; dy < 2; dy++) {
+                        const tileX = activeTile.position.x + dx * 64;
+                        const tileY = activeTile.position.y + dy * 64;
+                        const tile = placementTiles.find(
+                            t => t.position.x === tileX && t.position.y === tileY
+                        );
+                        if (tile && !tile.isOccupied) {
+                            c.fillStyle = canPlace ? 'rgba(255, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';
+                            c.fillRect(tile.position.x, tile.position.y, tile.size, tile.size);
+                        }
+                    }
+                }
+            }
 
-        const remainingTime = waveNotificationDuration - waveNotificationTimer;
-        const fadeDuration = 500;
-        const opacity = remainingTime < fadeDuration ? remainingTime / fadeDuration : 1;
+            drawMenu();
+            drawSelectedBuilding();
 
-        c.fillStyle = `rgba(0, 0, 0, ${0.8 * opacity})`;
-        c.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 30, 300, 60);
-        c.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-        c.font = '30px Changa One';
-        c.textAlign = 'center';
-        c.fillText(waveNotification, canvas.width / 2, canvas.height / 2 + 10);
-        c.textAlign = 'start';
+            let hoveredBuilding = null;
+            buildings.forEach((building) => {
+                if (building.isHovered(mouse.x, mouse.y)) {
+                    hoveredBuilding = building;
+                }
+            });
 
-        if (waveNotificationTimer >= waveNotificationDuration) {
-            waveNotification = null;
-            waveNotificationTimer = 0;
-            console.log('Wave notification hidden');
+            if (hoveredBuilding) {
+                activeTile = null;
+
+                c.fillStyle = 'rgba(255, 255, 0, 0.2)';
+                c.fillRect(
+                    hoveredBuilding.adjustedPosition.x,
+                    hoveredBuilding.adjustedPosition.y,
+                    hoveredBuilding.width,
+                    hoveredBuilding.height
+                );
+
+                const isNewSuperSeedTower = hoveredBuilding.towerType.name === 'SuperSeedTower';
+                const isSlowTower = hoveredBuilding.towerType.name === 'SlowTower';
+                const tooltipWidth = 180;
+                const tooltipHeight = (hoveredBuilding.slowFactor ? 90 : 60) + (isNewSuperSeedTower ? 15 : 0) + (isSlowTower ? 15 : 0);
+                const tooltipX = hoveredBuilding.adjustedPosition.x + hoveredBuilding.width / 2 - tooltipWidth / 2;
+                let tooltipY = hoveredBuilding.adjustedPosition.y - tooltipHeight - 20;
+                if (tooltipY < 0) {
+                    tooltipY = hoveredBuilding.adjustedPosition.y + hoveredBuilding.height + 20;
+                }
+
+                c.fillStyle = 'rgba(0, 0, 0, 0.9)';
+                c.fillRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
+
+                c.strokeStyle = 'white';
+                c.lineWidth = 1;
+                c.strokeRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
+
+                c.fillStyle = 'white';
+                c.font = '16px Changa One';
+                c.textAlign = 'left';
+                let yOffset = 20;
+
+                c.fillText(`Damage: ${hoveredBuilding.damage}`, tooltipX + 8, tooltipY + yOffset);
+                yOffset += 15;
+
+                if (hoveredBuilding.slowFactor) {
+                    const slowPercentage = ((1 - hoveredBuilding.slowFactor) * 100).toFixed(0);
+                    c.fillText(`Slow: ${slowPercentage}%`, tooltipX + 8, tooltipY + yOffset);
+                    yOffset += 15;
+                }
+
+                if (isSlowTower) {
+                    const numProjectiles = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 4 : 6;
+                    c.fillText(`Projectiles: ${numProjectiles}`, tooltipX + 8, tooltipY + yOffset);
+                    yOffset += 15;
+                }
+
+                c.fillText(`Type: ${hoveredBuilding.getDamageType()}`, tooltipX + 8, tooltipY + yOffset);
+                yOffset += 15;
+                c.fillText(`Fire Rate: ${(1000 / hoveredBuilding.fireRate).toFixed(2)} shots/s`, tooltipX + 8, tooltipY + yOffset);
+                if (isNewSuperSeedTower) {
+                    const multiplier = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 3 : 4;
+                    yOffset += 15;
+                    c.fillText(`Coin Multiplier: ${multiplier}x`, tooltipX + 8, tooltipY + yOffset);
+                }
+                c.textAlign = 'start';
+            }
+
+            const currentTime = Date.now();
+            var timeSinceLastWave = currentTime - lastWaveTime;
+            survivalTime = Math.floor((currentTime - startTime) / 1000);
+            const timerElement = document.querySelector('#timer');
+            if (timerElement) timerElement.innerHTML = leaderboard.formatTime(survivalTime);
+
+            if (timeSinceLastWave >= waveInterval) {
+                totalWaveCount++; // Increment total wave count (includes regular and boss waves)
+
+                if (waveNumber >= 12 && !isBossWaveNext && !isNeverEndingWave) {
+                    // After wave 12 (EnemyK12), the next wave is a boss wave (Boss4)
+                    if (isBossWaveNext) {
+                        spawnBoss();
+                        isBossWaveNext = false; // Reset for the next regular wave
+                    } else {
+                        waveNumber++; // Increment regular wave count to 13
+                        const enemyCount = calculateEnemyCount(waveNumber);
+                        spawnEnemies(enemyCount);
+                        if (waveNumber % 3 === 0) {
+                            isBossWaveNext = true;
+                        }
+                    }
+
+                    // Check if we've just finished the boss wave after wave 12 (Boss4)
+                    if (waveNumber > 12 && !isBossWaveNext) {
+                        isNeverEndingWave = true; // Start the never-ending wave
+                        waveNotification = "Never-Ending Wave! Survive as long as you can!";
+                        waveNotificationTimer = 0;
+                        console.log("Starting never-ending wave after Boss4");
+                    }
+                } else if (!isNeverEndingWave) {
+                    if (isBossWaveNext) {
+                        spawnBoss();
+                        isBossWaveNext = false;
+                    } else {
+                        waveNumber++;
+                        const enemyCount = calculateEnemyCount(waveNumber);
+                        spawnEnemies(enemyCount);
+                        if (waveNumber % 3 === 0) {
+                            isBossWaveNext = true;
+                        }
+                    }
+                }
+
+                lastWaveTime = currentTime;
+                console.log(`Wave interval: ${waveInterval / 1000} seconds, Time since last wave: ${timeSinceLastWave / 1000} seconds`);
+            }
+
+            // Handle continuous spawning for the never-ending wave
+            if (isNeverEndingWave) {
+                neverEndingSpawnTimer += deltaTime * 1000; // Increment timer based on frame time
+                if (neverEndingSpawnTimer >= neverEndingSpawnInterval) {
+                    const enemy = spawnEndlessEnemies();
+                    if (enemy) {
+                        enemies.push(enemy);
+                        enemies.sort((a, b) => a.position.y - b.position.y);
+                    }
+                    neverEndingSpawnTimer = 0; // Reset timer
+                }
+            }
         }
     }
+    else {
+            enemies.forEach(enemy => {
+                enemy.draw();
+            });
 
-    animationFrameId = requestAnimationFrame(animate);
-}
+            buildings.forEach(building => {
+                building.draw();
+                building.projectiles.forEach(projectile => {
+                    projectile.draw();
+                });
+            });
 
-const mouse = {
-    x: undefined,
-    y: undefined
-};
+            c.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            c.fillRect(0, 0, canvas.width, canvas.height);
+        }
 
-function resetGame() {
-    playMusic.pause();
-    playMusic.currentTime = 0;
-    gameStartMusic.pause();
-    gameStartMusic.currentTime = 0;
+        if (waveNotification) {
+            waveNotificationTimer += deltaTime * 1000;
 
-    enemies.length = 0;
-    buildings.forEach(building => {
-        building.projectiles.length = 0;
-    });
-    buildings.length = 0;
-    placementTiles.forEach((tile) => (tile.isOccupied = false));
-    enemyCount = 3;
-    hearts = 50;
-    coins = 150;
-    survivalTime = 0;
-    username = '';
-    gameStarted = false;
-    startTime = null;
-    menuOpen = false;
-    selectedTile = undefined;
-    activeTile = undefined;
-    hoveredTowerIndex = null;
-    selectedBuilding = null;
-    isUpgradeButtonHovered = false;
-    isSellButtonHovered = false;
-    hasInteracted = false;
-    waveNumber = 0;
-    lastWaveTime = 0;
-    maxTowerSlots = 10;
-    selectedClass = null;
-    waveNotification = null;
-    waveNotificationTimer = 0;
-    isEndlessMode = false;
-    endlessSpawnTimer = 0;
-    endlessWaveCounter = 0;
-    totalWaveCount = 0;
-    isBossWaveNext = false;
-    isNeverEndingWave = false; // Reset never-ending wave flag
-    neverEndingSpawnTimer = 0; // Reset never-ending wave spawn timer
+            const remainingTime = waveNotificationDuration - waveNotificationTimer;
+            const fadeDuration = 500;
+            const opacity = remainingTime < fadeDuration ? remainingTime / fadeDuration : 1;
 
-    // Update UI
-    const coinsElement = document.querySelector('#coins');
-    if (coinsElement) coinsElement.innerHTML = coins;
-    const heartsElement = document.querySelector('#hearts');
-    if (heartsElement) heartsElement.innerHTML = hearts;
-    const timerElement = document.querySelector('#timer');
-    if (timerElement) timerElement.innerHTML = formatTime(survivalTime);
+            c.fillStyle = `rgba(0, 0, 0, ${0.8 * opacity})`;
+            c.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 30, 300, 60);
+            c.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+            c.font = '30px Changa One';
+            c.textAlign = 'center';
+            c.fillText(waveNotification, canvas.width / 2, canvas.height / 2 + 10);
+            c.textAlign = 'start';
 
-    document.querySelector('#username-input').value = '';
+            if (waveNotificationTimer >= waveNotificationDuration) {
+                waveNotification = null;
+                waveNotificationTimer = 0;
+                console.log('Wave notification hidden');
+            }
+        }
 
-    const classRadios = document.querySelectorAll('input[name="player-class"]');
-    classRadios.forEach(radio => (radio.checked = false));
+        animationFrameId = requestAnimationFrame(animate);
+    }
 
-    const gameOverElement = document.querySelector('#gameOver');
-    if (gameOverElement) gameOverElement.style.display = 'none';
-    const startScreenElement = document.querySelector('#start-screen');
-    if (startScreenElement) startScreenElement.style.display = 'flex';
+    const mouse = {
+        x: undefined,
+        y: undefined
+    };
 
-    applyClassModifiers();
-}
+    function resetGame() {
+        playMusic.pause();
+        playMusic.currentTime = 0;
+        gameStartMusic.pause();
+        gameStartMusic.currentTime = 0;
 
-canvas.addEventListener('click', (event) => {
-    if (!gameStarted) return;
+        enemies.length = 0;
+        buildings.forEach(building => {
+            building.projectiles.length = 0;
+        });
+        buildings.length = 0;
+        placementTiles.forEach((tile) => (tile.isOccupied = false));
+        enemyCount = 3;
+        hearts = 50;
+        coins = 150;
+        survivalTime = 0;
+        username = '';
+        gameStarted = false;
+        startTime = null;
+        menuOpen = false;
+        selectedTile = undefined;
+        activeTile = undefined;
+        hoveredTowerIndex = null;
+        selectedBuilding = null;
+        isUpgradeButtonHovered = false;
+        isSellButtonHovered = false;
+        hasInteracted = false;
+        waveNumber = 0;
+        lastWaveTime = 0;
+        maxTowerSlots = 10;
+        selectedClass = null;
+        waveNotification = null;
+        waveNotificationTimer = 0;
+        isEndlessMode = false;
+        endlessSpawnTimer = 0;
+        endlessWaveCounter = 0;
+        totalWaveCount = 0;
+        isBossWaveNext = false;
+        isNeverEndingWave = false; // Reset never-ending wave flag
+        neverEndingSpawnTimer = 0; // Reset never-ending wave spawn timer
 
-    const mouseX = event.clientX - canvas.getBoundingClientRect().left;
-    const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+        // Update UI
+        const coinsElement = document.querySelector('#coins');
+        if (coinsElement) coinsElement.innerHTML = coins;
+        const heartsElement = document.querySelector('#hearts');
+        if (heartsElement) heartsElement.innerHTML = hearts;
+        const timerElement = document.querySelector('#timer');
+        if (timerElement) timerElement.innerHTML = leaderboard.formatTime(survivalTime);
 
-    console.log(`Click at (${mouseX}, ${mouseY})`);
+        document.querySelector('#username-input').value = '';
 
-    if (selectedBuilding) {
-        const buttonWidth = 120;
-        const buttonHeight = 36;
-        const buttonX = selectedBuilding.position.x + 128 + 5;
-        const towerCenterY = selectedBuilding.adjustedPosition.y + selectedBuilding.height / 2;
-        const totalButtonHeight = buttonHeight * 2 + 5;
-        const upgradeButtonY = towerCenterY - totalButtonHeight / 2;
-        const sellButtonY = upgradeButtonY + buttonHeight + 5;
+        const classRadios = document.querySelectorAll('input[name="player-class"]');
+        classRadios.forEach(radio => (radio.checked = false));
 
-        const upgradeCost = selectedBuilding.getUpgradeCost();
-        const canAffordUpgrade = coins >= upgradeCost;
-        const canUpgrade = selectedBuilding.level < 3;
+        const gameOverElement = document.querySelector('#gameOver');
+        if (gameOverElement) gameOverElement.style.display = 'none';
+        const startScreenElement = document.querySelector('#start-screen');
+        if (startScreenElement) startScreenElement.style.display = 'flex';
+
+        applyClassModifiers();
+    }
+
+    canvas.addEventListener('click', (event) => {
+        if (!gameStarted) return;
+
+        const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+        console.log(`Click at (${mouseX}, ${mouseY})`);
+
+        if (selectedBuilding) {
+            const buttonWidth = 120;
+            const buttonHeight = 36;
+            const buttonX = selectedBuilding.position.x + 128 + 5;
+            const towerCenterY = selectedBuilding.adjustedPosition.y + selectedBuilding.height / 2;
+            const totalButtonHeight = buttonHeight * 2 + 5;
+            const upgradeButtonY = towerCenterY - totalButtonHeight / 2;
+            const sellButtonY = upgradeButtonY + buttonHeight + 5;
+
+            const upgradeCost = selectedBuilding.getUpgradeCost();
+            const canAffordUpgrade = coins >= upgradeCost;
+            const canUpgrade = selectedBuilding.level < 3;
+
+            if (menuOpen && selectedTile && !selectedTile.isOccupied) {
+                const menuWidth = 64 * 4 + 7;
+                const menuHeight = 64 + 7 + 20;
+                const menuX = selectedTile.position.x + 64 - menuWidth / 2;
+                const menuYBase = selectedTile.position.y - 32;
+                const menuYShift = (64 + 7 + 20) * 0.2;
+                const menuY = menuYBase + menuYShift;
+
+                console.log(`Menu bounds: x(${menuX} to ${menuX + menuWidth}), y(${menuY} to ${menuY + menuHeight})`);
+
+                if (
+                    mouseX > menuX &&
+                    mouseX < menuX + menuWidth &&
+                    mouseY > menuY &&
+                    mouseY < menuY + menuHeight
+                ) {
+                    console.log(`Hovered tower index: ${hoveredTowerIndex}`);
+                    const towerIndex = hoveredTowerIndex;
+                    const availableTowers = selectedClass && selectedClass.name === 'Seeder'
+                        ? towerTypes.filter(tower => tower.name !== 'SuperSeedTower')
+                        : towerTypes;
+                    const selectedTower = availableTowers[towerIndex];
+
+                    console.log(`Selected tower: ${selectedTower ? selectedTower.name : 'undefined'}`);
+                    console.log(`Coins: ${coins}, Tower cost: ${selectedTower ? selectedTower.cost : 'N/A'}`);
+                    console.log(`Buildings: ${buildings.length}, Max tower slots: ${maxTowerSlots}`);
+
+                    if (selectedTower && coins >= selectedTower.cost && buildings.length < maxTowerSlots) {
+                        let canPlace = true;
+                        const tilesToOccupy = [];
+
+                        for (let dx = 0; dx < 2; dx++) {
+                            for (let dy = 0; dy < 2; dy++) {
+                                const tileX = selectedTile.position.x + dx * 64;
+                                const tileY = selectedTile.position.y + dy * 64;
+                                const tile = placementTiles.find(
+                                    t => t.position.x === tileX && t.position.y === tileY
+                                );
+                                if (!tile || tile.isOccupied) {
+                                    canPlace = false;
+                                    break;
+                                }
+                                tilesToOccupy.push(tile);
+                            }
+                            if (!canPlace) break;
+                        }
+
+                        if (!canPlace) {
+                            menuOpen = false;
+                            selectedTile = undefined;
+                            activeTile = undefined;
+                            console.log('Cannot place tower, closing menu');
+                            return;
+                        }
+
+                        coins -= selectedTower.cost;
+                        document.querySelector('#coins').innerHTML = Math.floor(coins);
+
+                        const newBuilding = new Building({
+                            position: {
+                                x: selectedTile.position.x,
+                                y: selectedTile.position.y
+                            },
+                            towerType: selectedTower
+                        });
+                        buildings.push(newBuilding);
+
+                        tilesToOccupy.forEach(tile => {
+                            tile.isOccupied = true;
+                        });
+
+                        menuOpen = false;
+                        selectedTile = undefined;
+                        activeTile = undefined;
+                        buildings.sort((a, b) => a.position.y - b.position.y);
+
+                        towerDoneSound.play().catch((error) => {
+                            console.error('Error playing TowerDone sound:', error);
+                        });
+                        console.log(`Placed new tower ${newBuilding.towerType.name} at (${newBuilding.center.x}, ${newBuilding.center.y})`);
+                    } else {
+                        console.log('Cannot place tower: conditions not met');
+                    }
+                    return;
+                } else {
+                    menuOpen = false;
+                    selectedTile = undefined;
+                    activeTile = undefined;
+                    selectedBuilding = null;
+                    console.log('Clicked outside menu, closing menu and deselecting building');
+                    return;
+                }
+            }
+
+            if (
+                canUpgrade &&
+                canAffordUpgrade &&
+                mouseX >= buttonX &&
+                mouseX <= buttonX + buttonWidth &&
+                mouseY >= upgradeButtonY &&
+                mouseY <= upgradeButtonY + buttonHeight
+            ) {
+                console.log(`Upgrading tower ${selectedBuilding.towerType.name} at (${selectedBuilding.center.x}, ${selectedBuilding.center.y})`);
+                coins -= upgradeCost;
+                document.querySelector('#coins').innerHTML = Math.floor(coins);
+                selectedBuilding.upgrade();
+                return;
+            }
+
+            if (
+                mouseX >= buttonX &&
+                mouseX <= buttonX + buttonWidth &&
+                mouseY >= sellButtonY &&
+                mouseY <= sellButtonY + buttonHeight
+            ) {
+                console.log(`Selling tower ${selectedBuilding.towerType.name} at (${selectedBuilding.center.x}, ${selectedBuilding.center.y})`);
+                const sellPrice = selectedBuilding.getSellPrice();
+                coins += sellPrice;
+                document.querySelector('#coins').innerHTML = Math.floor(coins);
+
+                const baseTile = placementTiles.find(
+                    t =>
+                        t.position.x === selectedBuilding.position.x &&
+                        t.position.y === selectedBuilding.position.y
+                );
+                if (baseTile) {
+                    const tileX = baseTile.position.x;
+                    const tileY = baseTile.position.y;
+                    for (let dx = 0; dx < 2; dx++) {
+                        for (let dy = 0; dy < 2; dy++) {
+                            const tile = placementTiles.find(
+                                t => t.position.x === tileX + dx * 64 && t.position.y === tileY + dy * 64
+                            );
+                            if (tile) tile.isOccupied = false;
+                        }
+                    }
+                }
+
+                buildings = buildings.filter(b => b !== selectedBuilding);
+                selectedBuilding = null;
+                console.log('Selected building set to null after selling');
+                return;
+            }
+        }
 
         if (menuOpen && selectedTile && !selectedTile.isOccupied) {
             const menuWidth = 64 * 4 + 7;
@@ -1575,24 +1684,17 @@ canvas.addEventListener('click', (event) => {
             const menuYShift = (64 + 7 + 20) * 0.2;
             const menuY = menuYBase + menuYShift;
 
-            console.log(`Menu bounds: x(${menuX} to ${menuX + menuWidth}), y(${menuY} to ${menuY + menuHeight})`);
-
             if (
                 mouseX > menuX &&
                 mouseX < menuX + menuWidth &&
                 mouseY > menuY &&
                 mouseY < menuY + menuHeight
             ) {
-                console.log(`Hovered tower index: ${hoveredTowerIndex}`);
                 const towerIndex = hoveredTowerIndex;
                 const availableTowers = selectedClass && selectedClass.name === 'Seeder'
                     ? towerTypes.filter(tower => tower.name !== 'SuperSeedTower')
                     : towerTypes;
                 const selectedTower = availableTowers[towerIndex];
-
-                console.log(`Selected tower: ${selectedTower ? selectedTower.name : 'undefined'}`);
-                console.log(`Coins: ${coins}, Tower cost: ${selectedTower ? selectedTower.cost : 'N/A'}`);
-                console.log(`Buildings: ${buildings.length}, Max tower slots: ${maxTowerSlots}`);
 
                 if (selectedTower && coins >= selectedTower.cost && buildings.length < maxTowerSlots) {
                     let canPlace = true;
@@ -1647,8 +1749,6 @@ canvas.addEventListener('click', (event) => {
                         console.error('Error playing TowerDone sound:', error);
                     });
                     console.log(`Placed new tower ${newBuilding.towerType.name} at (${newBuilding.center.x}, ${newBuilding.center.y})`);
-                } else {
-                    console.log('Cannot place tower: conditions not met');
                 }
                 return;
             } else {
@@ -1661,85 +1761,48 @@ canvas.addEventListener('click', (event) => {
             }
         }
 
-        if (
-            canUpgrade &&
-            canAffordUpgrade &&
-            mouseX >= buttonX &&
-            mouseX <= buttonX + buttonWidth &&
-            mouseY >= upgradeButtonY &&
-            mouseY <= upgradeButtonY + buttonHeight
-        ) {
-            console.log(`Upgrading tower ${selectedBuilding.towerType.name} at (${selectedBuilding.center.x}, ${selectedBuilding.center.y})`);
-            coins -= upgradeCost;
-            document.querySelector('#coins').innerHTML = Math.floor(coins);
-            selectedBuilding.upgrade();
-            return;
+        let newSelectedBuilding = null;
+        for (let i = 0; i < buildings.length; i++) {
+            const building = buildings[i];
+            if (building.isHovered(mouseX, mouseY)) {
+                console.log(`Clicked on ${building.towerType.name} at position (${building.adjustedPosition.x}, ${building.adjustedPosition.y}) with range ${building.radius}`);
+                newSelectedBuilding = building;
+                break;
+            } else {
+                console.log(`Click at (${mouseX}, ${mouseY}) did not hit ${building.towerType.name} at (${building.adjustedPosition.x}, ${building.adjustedPosition.y}) with width ${building.width}, height ${building.height}`);
+            }
         }
 
-        if (
-            mouseX >= buttonX &&
-            mouseX <= buttonX + buttonWidth &&
-            mouseY >= sellButtonY &&
-            mouseY <= sellButtonY + buttonHeight
-        ) {
-            console.log(`Selling tower ${selectedBuilding.towerType.name} at (${selectedBuilding.center.x}, ${selectedBuilding.center.y})`);
-            const sellPrice = selectedBuilding.getSellPrice();
-            coins += sellPrice;
-            document.querySelector('#coins').innerHTML = Math.floor(coins);
+        if (newSelectedBuilding !== selectedBuilding) {
+            console.log(`Changing selected building from ${selectedBuilding ? selectedBuilding.towerType.name : 'none'} (range: ${selectedBuilding ? selectedBuilding.radius : 'N/A'}) to ${newSelectedBuilding ? newSelectedBuilding.towerType.name : 'none'} (range: ${newSelectedBuilding ? newSelectedBuilding.radius : 'N/A'})`);
+            selectedBuilding = newSelectedBuilding;
+        }
 
-            const baseTile = placementTiles.find(
-                t =>
-                    t.position.x === selectedBuilding.position.x &&
-                    t.position.y === selectedBuilding.position.y
-            );
-            if (baseTile) {
-                const tileX = baseTile.position.x;
-                const tileY = baseTile.position.y;
-                for (let dx = 0; dx < 2; dx++) {
-                    for (let dy = 0; dy < 2; dy++) {
-                        const tile = placementTiles.find(
-                            t => t.position.x === tileX + dx * 64 && t.position.y === tileY + dy * 64
-                        );
-                        if (tile) tile.isOccupied = false;
-                    }
+        if (!newSelectedBuilding) {
+            activeTile = null;
+            for (let i = 0; i < placementTiles.length; i++) {
+                const tile = placementTiles[i];
+                if (
+                    mouseX > tile.position.x &&
+                    mouseX < tile.position.x + tile.size &&
+                    mouseY > tile.position.y &&
+                    mouseY < tile.position.y + tile.size
+                ) {
+                    activeTile = tile;
+                    break;
                 }
             }
 
-            buildings = buildings.filter(b => b !== selectedBuilding);
-            selectedBuilding = null;
-            console.log('Selected building set to null after selling');
-            return;
-        }
-    }
-
-    if (menuOpen && selectedTile && !selectedTile.isOccupied) {
-        const menuWidth = 64 * 4 + 7;
-        const menuHeight = 64 + 7 + 20;
-        const menuX = selectedTile.position.x + 64 - menuWidth / 2;
-        const menuYBase = selectedTile.position.y - 32;
-        const menuYShift = (64 + 7 + 20) * 0.2;
-        const menuY = menuYBase + menuYShift;
-
-        if (
-            mouseX > menuX &&
-            mouseX < menuX + menuWidth &&
-            mouseY > menuY &&
-            mouseY < menuY + menuHeight
-        ) {
-            const towerIndex = hoveredTowerIndex;
-            const availableTowers = selectedClass && selectedClass.name === 'Seeder'
-                ? towerTypes.filter(tower => tower.name !== 'SuperSeedTower')
-                : towerTypes;
-            const selectedTower = availableTowers[towerIndex];
-
-            if (selectedTower && coins >= selectedTower.cost && buildings.length < maxTowerSlots) {
+            if (activeTile && !activeTile.isOccupied) {
+                if (buildings.length >= maxTowerSlots) {
+                    console.log('Max tower slots reached, cannot open menu');
+                    return;
+                }
                 let canPlace = true;
-                const tilesToOccupy = [];
-
                 for (let dx = 0; dx < 2; dx++) {
                     for (let dy = 0; dy < 2; dy++) {
-                        const tileX = selectedTile.position.x + dx * 64;
-                        const tileY = selectedTile.position.y + dy * 64;
+                        const tileX = activeTile.position.x + dx * 64;
+                        const tileY = activeTile.position.y + dy * 64;
                         const tile = placementTiles.find(
                             t => t.position.x === tileX && t.position.y === tileY
                         );
@@ -1747,338 +1810,195 @@ canvas.addEventListener('click', (event) => {
                             canPlace = false;
                             break;
                         }
-                        tilesToOccupy.push(tile);
                     }
                     if (!canPlace) break;
                 }
 
-                if (!canPlace) {
-                    menuOpen = false;
-                    selectedTile = undefined;
-                    activeTile = undefined;
-                    console.log('Cannot place tower, closing menu');
-                    return;
+                if (canPlace) {
+                    menuOpen = true;
+                    selectedTile = activeTile;
+                    selectedBuilding = null;
+                    console.log('Opening menu for tower placement, deselecting building');
                 }
-
-                coins -= selectedTower.cost;
-                document.querySelector('#coins').innerHTML = Math.floor(coins);
-
-                const newBuilding = new Building({
-                    position: {
-                        x: selectedTile.position.x,
-                        y: selectedTile.position.y
-                    },
-                    towerType: selectedTower
-                });
-                buildings.push(newBuilding);
-
-                tilesToOccupy.forEach(tile => {
-                    tile.isOccupied = true;
-                });
-
-                menuOpen = false;
-                selectedTile = undefined;
-                activeTile = undefined;
-                buildings.sort((a, b) => a.position.y - b.position.y);
-
-                towerDoneSound.play().catch((error) => {
-                    console.error('Error playing TowerDone sound:', error);
-                });
-                console.log(`Placed new tower ${newBuilding.towerType.name} at (${newBuilding.center.x}, ${newBuilding.center.y})`);
-            }
-            return;
-        } else {
-            menuOpen = false;
-            selectedTile = undefined;
-            activeTile = undefined;
-            selectedBuilding = null;
-            console.log('Clicked outside menu, closing menu and deselecting building');
-            return;
-        }
-    }
-
-    let newSelectedBuilding = null;
-    for (let i = 0; i < buildings.length; i++) {
-        const building = buildings[i];
-        if (building.isHovered(mouseX, mouseY)) {
-            console.log(`Clicked on ${building.towerType.name} at position (${building.adjustedPosition.x}, ${building.adjustedPosition.y}) with range ${building.radius}`);
-            newSelectedBuilding = building;
-            break;
-        } else {
-            console.log(`Click at (${mouseX}, ${mouseY}) did not hit ${building.towerType.name} at (${building.adjustedPosition.x}, ${building.adjustedPosition.y}) with width ${building.width}, height ${building.height}`);
-        }
-    }
-
-    if (newSelectedBuilding !== selectedBuilding) {
-        console.log(`Changing selected building from ${selectedBuilding ? selectedBuilding.towerType.name : 'none'} (range: ${selectedBuilding ? selectedBuilding.radius : 'N/A'}) to ${newSelectedBuilding ? newSelectedBuilding.towerType.name : 'none'} (range: ${newSelectedBuilding ? newSelectedBuilding.radius : 'N/A'})`);
-        selectedBuilding = newSelectedBuilding;
-    }
-
-    if (!newSelectedBuilding) {
-        activeTile = null;
-        for (let i = 0; i < placementTiles.length; i++) {
-            const tile = placementTiles[i];
-            if (
-                mouseX > tile.position.x &&
-                mouseX < tile.position.x + tile.size &&
-                mouseY > tile.position.y &&
-                mouseY < tile.position.y + tile.size
-            ) {
-                activeTile = tile;
-                break;
-            }
-        }
-
-        if (activeTile && !activeTile.isOccupied) {
-            if (buildings.length >= maxTowerSlots) {
-                console.log('Max tower slots reached, cannot open menu');
-                return;
-            }
-            let canPlace = true;
-            for (let dx = 0; dx < 2; dx++) {
-                for (let dy = 0; dy < 2; dy++) {
-                    const tileX = activeTile.position.x + dx * 64;
-                    const tileY = activeTile.position.y + dy * 64;
-                    const tile = placementTiles.find(
-                        t => t.position.x === tileX && t.position.y === tileY
-                    );
-                    if (!tile || tile.isOccupied) {
-                        canPlace = false;
-                        break;
-                    }
-                }
-                if (!canPlace) break;
-            }
-
-            if (canPlace) {
-                menuOpen = true;
-                selectedTile = activeTile;
+            } else {
                 selectedBuilding = null;
-                console.log('Opening menu for tower placement, deselecting building');
+                console.log('Clicked on nothing, deselecting building');
             }
+        }
+    });
+
+    window.addEventListener('mousemove', (event) => {
+        if (!gameStarted) return;
+
+        mouse.x = event.clientX - canvas.getBoundingClientRect().left;
+        mouse.y = event.clientY - canvas.getBoundingClientRect().top;
+
+        let newHoveredBuilding = null;
+        if (!menuOpen) {
+            buildings.forEach((building) => {
+                if (building.isHovered(mouse.x, mouse.y)) {
+                    newHoveredBuilding = building;
+                }
+            });
+        }
+        hoveredBuilding = newHoveredBuilding;
+
+        if (!menuOpen && !hoveredBuilding) {
+            activeTile = null;
+            for (let i = 0; i < placementTiles.length; i++) {
+                const tile = placementTiles[i];
+                if (
+                    mouse.x > tile.position.x &&
+                    mouse.x < tile.position.x + tile.size &&
+                    mouse.y > tile.position.y &&
+                    mouse.y < tile.position.y + tile.size
+                ) {
+                    activeTile = tile;
+                    break;
+                }
+            }
+        } else if (hoveredBuilding) {
+            activeTile = null;
+        }
+    });
+
+    function applyClassModifiers() {
+        if (!selectedClass) return;
+
+        towerTypes.forEach(tower => {
+            tower.damage = towerTypes.find(t => t.name === tower.name).damage;
+            tower.fireRate = towerTypes.find(t => t.name === tower.name).fireRate;
+        });
+
+        if (selectedClass.name === 'Risker') {
+            towerTypes.forEach(tower => {
+                tower.damage *= selectedClass.damageModifier;
+                tower.fireRate /= selectedClass.fireRateModifier;
+            });
+        } else if (selectedClass.name === 'Flashy') {
+            towerTypes.forEach(tower => {
+                tower.damage *= selectedClass.damageModifier;
+            });
+        } else if (selectedClass.name === 'SuperSeeder') {
+            towerTypes.forEach(tower => {
+                tower.damage *= selectedClass.damageModifier;
+                tower.fireRate *= selectedClass.fireRateModifier;
+            });
+            hearts = Math.floor(hearts * selectedClass.livesModifier);
+        }
+    }
+
+    function startGameStartMusic() {
+        if (!hasInteracted) {
+            hasInteracted = true;
+            gameStartMusic.play().catch((error) => {
+                console.error('Error playing GameStartMusic on user interaction:', error);
+            });
+        }
+    }
+
+    const usernameInput = document.getElementById('username-input');
+    usernameInput.addEventListener('focus', startGameStartMusic);
+    usernameInput.addEventListener('keypress', startGameStartMusic);
+
+    document.getElementById('start-game-button').addEventListener('click', () => {
+        const usernameInput = document.querySelector('#username-input').value.trim();
+
+        if (usernameInput === '') {
+            alert('Please enter a username!');
+            return;
+        }
+
+        const selectedClassRadio = document.querySelector('input[name="player-class"]:checked');
+        if (!selectedClassRadio) {
+            alert('Please select a class!');
+            return;
+        }
+
+        username = usernameInput;
+        selectedClass = classes.find(cls => cls.name === selectedClassRadio.value);
+
+        applyClassModifiers();
+
+        // Update UI after applying class modifiers (which may adjust hearts)
+        document.querySelector('#hearts').innerHTML = hearts;
+        document.querySelector('#coins').innerHTML = coins;
+
+
+        document.querySelector('#start-screen').style.display = 'none';
+        gameStarted = true;
+        startTime = Date.now();
+        lastWaveTime = startTime;
+        waveNumber = 0; // Start at 0, will increment to 1 on first wave
+        gameStartMusic.pause();
+        gameStartMusic.currentTime = 0;
+        playMusic.play().catch((error) => {
+            console.error('Error playing PlayMusic on game start:', error);
+        });
+        // Spawn the first wave immediately
+        waveNumber++;
+        const enemyCount = calculateEnemyCount(waveNumber);
+        spawnEnemies(enemyCount);
+    });
+
+    function gameOver() {
+        console.log('Game Over');
+        gameStarted = false;
+        playMusic.pause();
+        playMusic.currentTime = 0;
+        gameOverSound.play().catch((error) => {
+            console.error('Error playing GameOver sound:', error);
+        });
+
+        survivalTime = Math.floor((Date.now() - startTime) / 1000);
+        const survivalTimeElement = document.querySelector('#survival-time');
+        if (survivalTimeElement) {
+            survivalTimeElement.innerHTML = leaderboard.formatTime(survivalTime);
         } else {
-            selectedBuilding = null;
-            console.log('Clicked on nothing, deselecting building');
+            console.warn('Survival time element not found in DOM');
         }
-    }
-});
 
-window.addEventListener('mousemove', (event) => {
-    if (!gameStarted) return;
-
-    mouse.x = event.clientX - canvas.getBoundingClientRect().left;
-    mouse.y = event.clientY - canvas.getBoundingClientRect().top;
-
-    let newHoveredBuilding = null;
-    if (!menuOpen) {
-        buildings.forEach((building) => {
-            if (building.isHovered(mouse.x, mouse.y)) {
-                newHoveredBuilding = building;
-            }
-        });
-    }
-    hoveredBuilding = newHoveredBuilding;
-
-    if (!menuOpen && !hoveredBuilding) {
-        activeTile = null;
-        for (let i = 0; i < placementTiles.length; i++) {
-            const tile = placementTiles[i];
-            if (
-                mouse.x > tile.position.x &&
-                mouse.x < tile.position.x + tile.size &&
-                mouse.y > tile.position.y &&
-                mouse.y < tile.position.y + tile.size
-            ) {
-                activeTile = tile;
-                break;
-            }
+        const gameOverElement = document.querySelector('#gameOver');
+        if (gameOverElement) {
+            gameOverElement.style.display = 'flex';
+        } else {
+            console.warn('Game over element not found in DOM');
         }
-    } else if (hoveredBuilding) {
-        activeTile = null;
+
+        // Save the score using leaderboard.js
+        const usernameValue = document.querySelector('#username-input').value || 'Anonymous';
+        leaderboard.saveScore(usernameValue, survivalTime);
+
+        // Update both game-over and start screen leaderboards
+        leaderboard.displayLeaderboard('game-over-leaderboard-body');
+        leaderboard.displayLeaderboard('start-leaderboard-body');
     }
-});
 
-function applyClassModifiers() {
-    if (!selectedClass) return;
-
-    towerTypes.forEach(tower => {
-        tower.damage = towerTypes.find(t => t.name === tower.name).damage;
-        tower.fireRate = towerTypes.find(t => t.name === tower.name).fireRate;
+    document.getElementById('play-again-button').addEventListener('click', () => {
+        resetGame();
     });
 
-    if (selectedClass.name === 'Risker') {
-        towerTypes.forEach(tower => {
-            tower.damage *= selectedClass.damageModifier;
-            tower.fireRate /= selectedClass.fireRateModifier;
-        });
-    } else if (selectedClass.name === 'Flashy') {
-        towerTypes.forEach(tower => {
-            tower.damage *= selectedClass.damageModifier;
-        });
-    } else if (selectedClass.name === 'SuperSeeder') {
-        towerTypes.forEach(tower => {
-            tower.damage *= selectedClass.damageModifier;
-            tower.fireRate *= selectedClass.fireRateModifier;
-        });
-        hearts = Math.floor(hearts * selectedClass.livesModifier);
-    }
-}
+    leaderboard.displayLeaderboard('start-leaderboard-body');
 
-function startGameStartMusic() {
-    if (!hasInteracted) {
-        hasInteracted = true;
-        gameStartMusic.play().catch((error) => {
-            console.error('Error playing GameStartMusic on user interaction:', error);
-        });
-    }
-}
+    document.addEventListener('DOMContentLoaded', () => {
+        const startScreen = document.querySelector('#start-screen');
+        if (startScreen) {
+            startScreen.style.display = 'flex';
+        } else {
+            console.error('Start screen element not found!');
+        }
+        gameStarted = false;
 
-function saveScore(username, time) {
-    const scores = getScores();
-    scores.push({ username, time });
-    // Sort by time (descending) and keep top 10
-    scores.sort((a, b) => b.time - a.time);
-    const top10 = scores.slice(0, 10);
-    localStorage.setItem('leaderboard', JSON.stringify(top10));
-}
-
-function getScores() {
-    const scores = localStorage.getItem('leaderboard');
-    return scores ? JSON.parse(scores) : [];
-}
-
-function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-}
-
-const usernameInput = document.getElementById('username-input');
-usernameInput.addEventListener('focus', startGameStartMusic);
-usernameInput.addEventListener('keypress', startGameStartMusic);
-
-document.getElementById('start-game-button').addEventListener('click', () => {
-    const usernameInput = document.querySelector('#username-input').value.trim();
-
-    if (usernameInput === '') {
-        alert('Please enter a username!');
-        return;
-    }
-
-    const selectedClassRadio = document.querySelector('input[name="player-class"]:checked');
-    if (!selectedClassRadio) {
-        alert('Please select a class!');
-        return;
-    }
-
-    username = usernameInput;
-    selectedClass = classes.find(cls => cls.name === selectedClassRadio.value);
-
-    applyClassModifiers();
-
-    // Update UI after applying class modifiers (which may adjust hearts)
-    document.querySelector('#hearts').innerHTML = hearts;
-    document.querySelector('#coins').innerHTML = coins;
-
-
-    document.querySelector('#start-screen').style.display = 'none';
-    gameStarted = true;
-    startTime = Date.now();
-    lastWaveTime = startTime;
-    waveNumber = 0; // Start at 0, will increment to 1 on first wave
-    gameStartMusic.pause();
-    gameStartMusic.currentTime = 0;
-    playMusic.play().catch((error) => {
-        console.error('Error playing PlayMusic on game start:', error);
-    });
-    // Spawn the first wave immediately
-    waveNumber++;
-    const enemyCount = calculateEnemyCount(waveNumber);
-    spawnEnemies(enemyCount);
-});
-
-function gameOver() {
-    console.log('Game Over');
-    gameStarted = false;
-    playMusic.pause();
-    playMusic.currentTime = 0;
-    gameOverSound.play().catch((error) => {
-        console.error('Error playing GameOver sound:', error);
+        // Initialize UI values
+        document.querySelector('#coins').innerHTML = coins;
+        document.querySelector('#hearts').innerHTML = hearts;
+        document.querySelector('#timer').innerHTML = leaderboard.formatTime(survivalTime);
     });
 
-    survivalTime = Math.floor((Date.now() - startTime) / 1000);
-    const survivalTimeElement = document.querySelector('#survival-time');
-    if (survivalTimeElement) {
-        survivalTimeElement.innerHTML = formatTime(survivalTime);
-    } else {
-        console.warn('Survival time element not found in DOM');
-    }
-
-    const gameOverElement = document.querySelector('#gameOver');
-    if (gameOverElement) {
-        gameOverElement.style.display = 'flex';
-    } else {
-        console.warn('Game over element not found in DOM');
-    }
-
-    // Save the score and update the leaderboard
-    const finalTime = survivalTime; // survivalTime is already in seconds
-    const usernameValue = document.querySelector('#username-input').value || 'Anonymous';
-    saveScore(usernameValue, finalTime); // Save the score
-
-    // Update game-over leaderboard
-    const leaderboardBody = document.querySelector('#game-over-leaderboard-body');
-    leaderboardBody.innerHTML = '';
-    const scores = getScores();
-    scores.forEach((score, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${score.username}</td>
-            <td>${formatTime(score.time)}</td>
-        `;
-        leaderboardBody.appendChild(row);
+    loadImages().then(() => {
+        console.log('Starting initial render...');
+        animate();
+    }).catch((error) => {
+        console.error('Error loading images:', error);
+        displayError('Error loading images: ' + error.message);
     });
-
-    // Also update start screen leaderboard
-    const startLeaderboardBody = document.querySelector('#start-leaderboard-body');
-    startLeaderboardBody.innerHTML = '';
-    scores.forEach((score, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${score.username}</td>
-            <td>${formatTime(score.time)}</td>
-        `;
-        startLeaderboardBody.appendChild(row);
-    });
-}
-
-document.getElementById('play-again-button').addEventListener('click', () => {
-    resetGame();
-});
-
-displayLeaderboard('start-leaderboard-body');
-
-document.addEventListener('DOMContentLoaded', () => {
-    const startScreen = document.querySelector('#start-screen');
-    if (startScreen) {
-        startScreen.style.display = 'flex';
-    } else {
-        console.error('Start screen element not found!');
-    }
-    gameStarted = false;
-
-    // Initialize UI values
-    document.querySelector('#coins').innerHTML = coins;
-    document.querySelector('#hearts').innerHTML = hearts;
-    document.querySelector('#timer').innerHTML = formatTime(survivalTime);
-});
-
-loadImages().then(() => {
-    console.log('Starting initial render...');
-    animate();
-}).catch((error) => {
-    console.error('Error loading images:', error);
-    displayError('Error loading images: ' + error.message);
-});

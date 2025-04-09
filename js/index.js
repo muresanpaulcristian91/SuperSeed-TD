@@ -1192,31 +1192,7 @@ function animate(timestamp) {
                 enemies.splice(i, 1);
 
                 if (hearts <= 0) {
-                    gameStarted = false;
-                    playMusic.pause();
-                    playMusic.currentTime = 0;
-                    gameOverSound.play().catch((error) => {
-                        console.error('Error playing GameOver sound:', error);
-                    });
-
-                    survivalTime = Math.floor((Date.now() - startTime) / 1000);
-                    const survivalTimeElement = document.querySelector('#survival-time');
-                    if (survivalTimeElement) {
-                        survivalTimeElement.innerHTML = formatTime(survivalTime);
-                    } else {
-                        console.warn('Survival time element not found in DOM');
-                    }
-
-                    const gameOverElement = document.querySelector('#gameOver');
-                    if (gameOverElement) {
-                        gameOverElement.style.display = 'flex';
-                    } else {
-                        console.warn('Game over element not found in DOM');
-                    }
-
-                    updateLeaderboard(username, survivalTime);
-                    displayLeaderboard('game-over-leaderboard-body');
-                }
+                    gameOver();
             }
         }
 
@@ -1957,6 +1933,26 @@ function startGameStartMusic() {
     }
 }
 
+function saveScore(username, time) {
+    const scores = getScores();
+    scores.push({ username, time });
+    // Sort by time (descending) and keep top 10
+    scores.sort((a, b) => b.time - a.time);
+    const top10 = scores.slice(0, 10);
+    localStorage.setItem('leaderboard', JSON.stringify(top10));
+}
+
+function getScores() {
+    const scores = localStorage.getItem('leaderboard');
+    return scores ? JSON.parse(scores) : [];
+}
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
 const usernameInput = document.getElementById('username-input');
 usernameInput.addEventListener('focus', startGameStartMusic);
 usernameInput.addEventListener('keypress', startGameStartMusic);
@@ -2000,6 +1996,63 @@ document.getElementById('start-game-button').addEventListener('click', () => {
     const enemyCount = calculateEnemyCount(waveNumber);
     spawnEnemies(enemyCount);
 });
+
+function gameOver() {
+    console.log('Game Over');
+    gameStarted = false;
+    playMusic.pause();
+    playMusic.currentTime = 0;
+    gameOverSound.play().catch((error) => {
+        console.error('Error playing GameOver sound:', error);
+    });
+
+    survivalTime = Math.floor((Date.now() - startTime) / 1000);
+    const survivalTimeElement = document.querySelector('#survival-time');
+    if (survivalTimeElement) {
+        survivalTimeElement.innerHTML = formatTime(survivalTime);
+    } else {
+        console.warn('Survival time element not found in DOM');
+    }
+
+    const gameOverElement = document.querySelector('#gameOver');
+    if (gameOverElement) {
+        gameOverElement.style.display = 'flex';
+    } else {
+        console.warn('Game over element not found in DOM');
+    }
+
+    // Save the score and update the leaderboard
+    const finalTime = survivalTime; // survivalTime is already in seconds
+    const usernameValue = document.querySelector('#username-input').value || 'Anonymous';
+    saveScore(usernameValue, finalTime); // Save the score
+
+    // Update game-over leaderboard
+    const leaderboardBody = document.querySelector('#game-over-leaderboard-body');
+    leaderboardBody.innerHTML = '';
+    const scores = getScores();
+    scores.forEach((score, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${score.username}</td>
+            <td>${formatTime(score.time)}</td>
+        `;
+        leaderboardBody.appendChild(row);
+    });
+
+    // Also update start screen leaderboard
+    const startLeaderboardBody = document.querySelector('#start-leaderboard-body');
+    startLeaderboardBody.innerHTML = '';
+    scores.forEach((score, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${score.username}</td>
+            <td>${formatTime(score.time)}</td>
+        `;
+        startLeaderboardBody.appendChild(row);
+    });
+}
 
 document.getElementById('play-again-button').addEventListener('click', () => {
     resetGame();

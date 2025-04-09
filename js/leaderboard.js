@@ -46,7 +46,6 @@ function displayLeaderboard(tableBodyId) {
 }
 
 // Export functions for use in other files
-// Note: Since we're using <script> tags, we attach these to the global window object
 window.leaderboard = {
     formatTime,
     getLeaderboard,

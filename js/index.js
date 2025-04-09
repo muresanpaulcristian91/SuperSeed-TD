@@ -1124,8 +1124,10 @@ function animate(timestamp) {
     const deltaTime = (timestamp - lastFrameTime) / 1000;
     lastFrameTime = timestamp;
 
+    // Clear the entire canvas once per frame
     c.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw the background
     if (backgroundImage.complete && backgroundImage.naturalWidth !== 0) {
         c.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     } else {
@@ -1135,6 +1137,7 @@ function animate(timestamp) {
     }
 
     if (gameStarted) {
+        // Update all enemies
         for (let i = enemies.length - 1; i >= 0; i--) {
             const enemy = enemies[i];
             enemy.update();
@@ -1159,289 +1162,290 @@ function animate(timestamp) {
                     gameOver();
                 }
             }
+        }
 
-            for (let i = buildings.length - 1; i >= 0; i--) {
-                const building = buildings[i];
-                building.update();
+        // Update all buildings and their projectiles
+        for (let i = buildings.length - 1; i >= 0; i--) {
+            const building = buildings[i];
+            building.update();
 
-                for (let j = building.projectiles.length - 1; j >= 0; j--) {
-                    const projectile = building.projectiles[j];
-                    projectile.update();
+            for (let j = building.projectiles.length - 1; j >= 0; j--) {
+                const projectile = building.projectiles[j];
+                projectile.update();
 
-                    if (!enemies.includes(projectile.enemy)) {
-                        console.log(`Enemy for projectile ${j} no longer exists, removing projectile`);
-                        building.projectiles.splice(j, 1);
-                        continue;
-                    }
+                if (!enemies.includes(projectile.enemy)) {
+                    console.log(`Enemy for projectile ${j} no longer exists, removing projectile`);
+                    building.projectiles.splice(j, 1);
+                    continue;
+                }
 
-                    if (projectile.hasHit) {
-                        const enemiesToRemove = [];
+                if (projectile.hasHit) {
+                    const enemiesToRemove = [];
 
-                        if (projectile.power > 0) {
-                            if (projectile.splash) {
-                                console.log('Applying splash damage with radius 100');
-                                enemies.forEach((enemy) => {
-                                    const dx = enemy.center.x - projectile.position.x;
-                                    const dy = enemy.center.y - projectile.position.y;
-                                    const splashDistance = Math.sqrt(dx * dx + dy * dy);
-                                    if (splashDistance < 100) {
-                                        console.log(`Splash hit enemy at distance ${splashDistance}, dealing ${projectile.power} damage`);
-                                        enemy.health -= projectile.power;
-                                        console.log(`Enemy health after splash damage: ${enemy.health}`);
-                                        if (enemy.health <= 0) {
-                                            enemiesToRemove.push(enemy);
-                                        }
+                    if (projectile.power > 0) {
+                        if (projectile.splash) {
+                            console.log('Applying splash damage with radius 100');
+                            enemies.forEach((enemy) => {
+                                const dx = enemy.center.x - projectile.position.x;
+                                const dy = enemy.center.y - projectile.position.y;
+                                const splashDistance = Math.sqrt(dx * dx + dy * dy);
+                                if (splashDistance < 100) {
+                                    console.log(`Splash hit enemy at distance ${splashDistance}, dealing ${projectile.power} damage`);
+                                    enemy.health -= projectile.power;
+                                    console.log(`Enemy health after splash damage: ${enemy.health}`);
+                                    if (enemy.health <= 0) {
+                                        enemiesToRemove.push(enemy);
                                     }
-                                });
+                                }
+                            });
 
-                                enemiesToRemove.forEach((enemy) => {
-                                    const index = enemies.indexOf(enemy);
-                                    if (index > -1) {
-                                        const reward = calculateCoinReward(projectile, enemy.reward || 5);
-                                        enemies.splice(index, 1);
-                                        coins += reward;
-                                        console.log(`Enemy killed by splash, adding ${reward} coins. Total coins: ${coins}`);
-                                        const coinsElement = document.querySelector('#coins');
-                                        if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
-                                    }
-                                });
-                            } else {
-                                console.log(`Applying single-target damage: ${projectile.power} to enemy with health ${projectile.enemy.health}`);
-                                projectile.enemy.health -= projectile.power;
-                                console.log(`Enemy health after single-target damage: ${projectile.enemy.health}`);
-                                if (projectile.enemy.health <= 0) {
-                                    const index = enemies.indexOf(projectile.enemy);
-                                    if (index > -1) {
-                                        const reward = calculateCoinReward(projectile, projectile.enemy.reward || 5);
-                                        enemies.splice(index, 1);
-                                        coins += reward;
-                                        console.log(`Enemy killed by ${building.towerType.name}, adding ${reward} coins. Total coins: ${coins}`);
-                                        const coinsElement = document.querySelector('#coins');
-                                        if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
-                                    }
+                            enemiesToRemove.forEach((enemy) => {
+                                const index = enemies.indexOf(enemy);
+                                if (index > -1) {
+                                    const reward = calculateCoinReward(projectile, enemy.reward || 5);
+                                    enemies.splice(index, 1);
+                                    coins += reward;
+                                    console.log(`Enemy killed by splash, adding ${reward} coins. Total coins: ${coins}`);
+                                    const coinsElement = document.querySelector('#coins');
+                                    if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
+                                }
+                            });
+                        } else {
+                            console.log(`Applying single-target damage: ${projectile.power} to enemy with health ${projectile.enemy.health}`);
+                            projectile.enemy.health -= projectile.power;
+                            console.log(`Enemy health after single-target damage: ${projectile.enemy.health}`);
+                            if (projectile.enemy.health <= 0) {
+                                const index = enemies.indexOf(projectile.enemy);
+                                if (index > -1) {
+                                    const reward = calculateCoinReward(projectile, projectile.enemy.reward || 5);
+                                    enemies.splice(index, 1);
+                                    coins += reward;
+                                    console.log(`Enemy killed by ${building.towerType.name}, adding ${reward} coins. Total coins: ${coins}`);
+                                    const coinsElement = document.querySelector('#coins');
+                                    if (coinsElement) coinsElement.innerHTML = Math.floor(coins);
                                 }
                             }
                         }
-
-                        if (projectile.slowFactor && projectile.slowDuration) {
-                            console.log(`Applying slow effect: factor ${projectile.slowFactor}, duration ${projectile.slowDuration}`);
-                            projectile.enemy.applySlow(projectile.slowFactor, projectile.slowDuration);
-                        }
-
-                        console.log(`Removing projectile ${j} after hit`);
-                        building.projectiles.splice(j, 1);
-                        continue;
-                    }
-                }
-            }
-
-            placementTiles.forEach((tile) => {
-                tile.update(mouse);
-            });
-
-            if (activeTile && !activeTile.isOccupied && !menuOpen) {
-                let canPlace = true;
-                for (let dx = 0; dx < 2; dx++) {
-                    for (let dy = 0; dy < 2; dy++) {
-                        const tileX = activeTile.position.x + dx * 64;
-                        const tileY = activeTile.position.y + dy * 64;
-                        const tile = placementTiles.find(
-                            t => t.position.x === tileX && t.position.y === tileY
-                        );
-                        if (!tile || tile.isOccupied) {
-                            canPlace = false;
-                            break;
-                        }
-                    }
-                    if (!canPlace) break;
-                }
-
-                for (let dx = 0; dx < 2; dx++) {
-                    for (let dy = 0; dy < 2; dy++) {
-                        const tileX = activeTile.position.x + dx * 64;
-                        const tileY = activeTile.position.y + dy * 64;
-                        const tile = placementTiles.find(
-                            t => t.position.x === tileX && t.position.y === tileY
-                        );
-                        if (tile && !tile.isOccupied) {
-                            c.fillStyle = canPlace ? 'rgba(255, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';
-                            c.fillRect(tile.position.x, tile.position.y, tile.size, tile.size);
-                        }
-                    }
-                }
-            }
-
-            drawMenu();
-            drawSelectedBuilding();
-
-            let hoveredBuilding = null;
-            buildings.forEach((building) => {
-                if (building.isHovered(mouse.x, mouse.y)) {
-                    hoveredBuilding = building;
-                }
-            });
-
-            if (hoveredBuilding) {
-                activeTile = null;
-
-                c.fillStyle = 'rgba(255, 255, 0, 0.2)';
-                c.fillRect(
-                    hoveredBuilding.adjustedPosition.x,
-                    hoveredBuilding.adjustedPosition.y,
-                    hoveredBuilding.width,
-                    hoveredBuilding.height
-                );
-
-                const isNewSuperSeedTower = hoveredBuilding.towerType.name === 'SuperSeedTower';
-                const isSlowTower = hoveredBuilding.towerType.name === 'SlowTower';
-                const tooltipWidth = 180;
-                const tooltipHeight = (hoveredBuilding.slowFactor ? 90 : 60) + (isNewSuperSeedTower ? 15 : 0) + (isSlowTower ? 15 : 0);
-                const tooltipX = hoveredBuilding.adjustedPosition.x + hoveredBuilding.width / 2 - tooltipWidth / 2;
-                let tooltipY = hoveredBuilding.adjustedPosition.y - tooltipHeight - 20;
-                if (tooltipY < 0) {
-                    tooltipY = hoveredBuilding.adjustedPosition.y + hoveredBuilding.height + 20;
-                }
-
-                c.fillStyle = 'rgba(0, 0, 0, 0.9)';
-                c.fillRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
-
-                c.strokeStyle = 'white';
-                c.lineWidth = 1;
-                c.strokeRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
-
-                c.fillStyle = 'white';
-                c.font = '16px Changa One';
-                c.textAlign = 'left';
-                let yOffset = 20;
-
-                c.fillText(`Damage: ${hoveredBuilding.damage}`, tooltipX + 8, tooltipY + yOffset);
-                yOffset += 15;
-
-                if (hoveredBuilding.slowFactor) {
-                    const slowPercentage = ((1 - hoveredBuilding.slowFactor) * 100).toFixed(0);
-                    c.fillText(`Slow: ${slowPercentage}%`, tooltipX + 8, tooltipY + yOffset);
-                    yOffset += 15;
-                }
-
-                if (isSlowTower) {
-                    const numProjectiles = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 4 : 6;
-                    c.fillText(`Projectiles: ${numProjectiles}`, tooltipX + 8, tooltipY + yOffset);
-                    yOffset += 15;
-                }
-
-                c.fillText(`Type: ${hoveredBuilding.getDamageType()}`, tooltipX + 8, tooltipY + yOffset);
-                yOffset += 15;
-                c.fillText(`Fire Rate: ${(1000 / hoveredBuilding.fireRate).toFixed(2)} shots/s`, tooltipX + 8, tooltipY + yOffset);
-                if (isNewSuperSeedTower) {
-                    const multiplier = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 3 : 4;
-                    yOffset += 15;
-                    c.fillText(`Coin Multiplier: ${multiplier}x`, tooltipX + 8, tooltipY + yOffset);
-                }
-                c.textAlign = 'start';
-            }
-
-            const currentTime = Date.now();
-            var timeSinceLastWave = currentTime - lastWaveTime;
-            survivalTime = Math.floor((currentTime - startTime) / 1000);
-            const timerElement = document.querySelector('#timer');
-            if (timerElement) timerElement.innerHTML = leaderboard.formatTime(survivalTime);
-
-            if (timeSinceLastWave >= waveInterval) {
-                totalWaveCount++; // Increment total wave count (includes regular and boss waves)
-
-                if (waveNumber >= 12 && !isBossWaveNext && !isNeverEndingWave) {
-                    // After wave 12 (EnemyK12), the next wave is a boss wave (Boss4)
-                    if (isBossWaveNext) {
-                        spawnBoss();
-                        isBossWaveNext = false; // Reset for the next regular wave
-                    } else {
-                        waveNumber++; // Increment regular wave count to 13
-                        const enemyCount = calculateEnemyCount(waveNumber);
-                        spawnEnemies(enemyCount);
-                        if (waveNumber % 3 === 0) {
-                            isBossWaveNext = true;
-                        }
                     }
 
-                    // Check if we've just finished the boss wave after wave 12 (Boss4)
-                    if (waveNumber > 12 && !isBossWaveNext) {
-                        isNeverEndingWave = true; // Start the never-ending wave
-                        waveNotification = "Never-Ending Wave! Survive as long as you can!";
-                        waveNotificationTimer = 0;
-                        console.log("Starting never-ending wave after Boss4");
+                    if (projectile.slowFactor && projectile.slowDuration) {
+                        console.log(`Applying slow effect: factor ${projectile.slowFactor}, duration ${projectile.slowDuration}`);
+                        projectile.enemy.applySlow(projectile.slowFactor, projectile.slowDuration);
                     }
-                } else if (!isNeverEndingWave) {
-                    if (isBossWaveNext) {
-                        spawnBoss();
-                        isBossWaveNext = false;
-                    } else {
-                        waveNumber++;
-                        const enemyCount = calculateEnemyCount(waveNumber);
-                        spawnEnemies(enemyCount);
-                        if (waveNumber % 3 === 0) {
-                            isBossWaveNext = true;
-                        }
-                    }
-                }
 
-                lastWaveTime = currentTime;
-                console.log(`Wave interval: ${waveInterval / 1000} seconds, Time since last wave: ${timeSinceLastWave / 1000} seconds`);
-            }
-
-            // Handle continuous spawning for the never-ending wave
-            if (isNeverEndingWave) {
-                neverEndingSpawnTimer += deltaTime * 1000; // Increment timer based on frame time
-                if (neverEndingSpawnTimer >= neverEndingSpawnInterval) {
-                    const enemy = spawnEndlessEnemies();
-                    if (enemy) {
-                        enemies.push(enemy);
-                        enemies.sort((a, b) => a.position.y - b.position.y);
-                    }
-                    neverEndingSpawnTimer = 0; // Reset timer
+                    console.log(`Removing projectile ${j} after hit`);
+                    building.projectiles.splice(j, 1);
+                    continue;
                 }
             }
         }
-    }
-    else {
-            enemies.forEach(enemy => {
-                enemy.draw();
-            });
 
-            buildings.forEach(building => {
-                building.draw();
-                building.projectiles.forEach(projectile => {
-                    projectile.draw();
-                });
-            });
+        // Draw placement tiles explicitly to control rendering
+        placementTiles.forEach((tile) => {
+            // Assuming PlacementTile has a draw method; if not, we draw directly
+            if (typeof tile.draw === 'function') {
+                tile.draw(c); // Ensure PlacementTile.draw doesn't use semi-transparent fills unless intended
+            } else {
+                // Default drawing if no draw method exists
+                c.fillStyle = tile.isOccupied ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 255, 0, 0.5)';
+                c.fillRect(tile.position.x, tile.position.y, tile.size, tile.size);
+            }
+        });
 
-            c.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            c.fillRect(0, 0, canvas.width, canvas.height);
+        // Highlight the active tile area if applicable
+        if (activeTile && !activeTile.isOccupied && !menuOpen) {
+            let canPlace = true;
+            const tilesToHighlight = [];
+
+            for (let dx = 0; dx < 2; dx++) {
+                for (let dy = 0; dy < 2; dy++) {
+                    const tileX = activeTile.position.x + dx * 64;
+                    const tileY = activeTile.position.y + dy * 64;
+                    const tile = placementTiles.find(
+                        t => t.position.x === tileX && t.position.y === tileY
+                    );
+                    if (!tile || tile.isOccupied) {
+                        canPlace = false;
+                    }
+                    if (tile) {
+                        tilesToHighlight.push(tile);
+                    }
+                }
+            }
+
+            // Draw the highlight for the 2x2 area
+            tilesToHighlight.forEach(tile => {
+                c.fillStyle = canPlace ? 'rgba(255, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';
+                c.fillRect(tile.position.x, tile.position.y, tile.size, tile.size);
+            });
         }
 
-        if (waveNotification) {
-            waveNotificationTimer += deltaTime * 1000;
+        drawMenu();
+        drawSelectedBuilding();
 
-            const remainingTime = waveNotificationDuration - waveNotificationTimer;
-            const fadeDuration = 500;
-            const opacity = remainingTime < fadeDuration ? remainingTime / fadeDuration : 1;
+        let hoveredBuilding = null;
+        buildings.forEach((building) => {
+            if (building.isHovered(mouse.x, mouse.y)) {
+                hoveredBuilding = building;
+            }
+        });
 
-            c.fillStyle = `rgba(0, 0, 0, ${0.8 * opacity})`;
-            c.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 30, 300, 60);
-            c.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-            c.font = '30px Changa One';
-            c.textAlign = 'center';
-            c.fillText(waveNotification, canvas.width / 2, canvas.height / 2 + 10);
+        if (hoveredBuilding) {
+            activeTile = null;
+
+            c.fillStyle = 'rgba(255, 255, 0, 0.2)';
+            c.fillRect(
+                hoveredBuilding.adjustedPosition.x,
+                hoveredBuilding.adjustedPosition.y,
+                hoveredBuilding.width,
+                hoveredBuilding.height
+            );
+
+            const isNewSuperSeedTower = hoveredBuilding.towerType.name === 'SuperSeedTower';
+            const isSlowTower = hoveredBuilding.towerType.name === 'SlowTower';
+            const tooltipWidth = 180;
+            const tooltipHeight = (hoveredBuilding.slowFactor ? 90 : 60) + (isNewSuperSeedTower ? 15 : 0) + (isSlowTower ? 15 : 0);
+            const tooltipX = hoveredBuilding.adjustedPosition.x + hoveredBuilding.width / 2 - tooltipWidth / 2;
+            let tooltipY = hoveredBuilding.adjustedPosition.y - tooltipHeight - 20;
+            if (tooltipY < 0) {
+                tooltipY = hoveredBuilding.adjustedPosition.y + hoveredBuilding.height + 20;
+            }
+
+            c.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            c.fillRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
+
+            c.strokeStyle = 'white';
+            c.lineWidth = 1;
+            c.strokeRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight);
+
+            c.fillStyle = 'white';
+            c.font = '16px Changa One';
+            c.textAlign = 'left';
+            let yOffset = 20;
+
+            c.fillText(`Damage: ${hoveredBuilding.damage}`, tooltipX + 8, tooltipY + yOffset);
+            yOffset += 15;
+
+            if (hoveredBuilding.slowFactor) {
+                const slowPercentage = ((1 - hoveredBuilding.slowFactor) * 100).toFixed(0);
+                c.fillText(`Slow: ${slowPercentage}%`, tooltipX + 8, tooltipY + yOffset);
+                yOffset += 15;
+            }
+
+            if (isSlowTower) {
+                const numProjectiles = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 4 : 6;
+                c.fillText(`Projectiles: ${numProjectiles}`, tooltipX + 8, tooltipY + yOffset);
+                yOffset += 15;
+            }
+
+            c.fillText(`Type: ${hoveredBuilding.getDamageType()}`, tooltipX + 8, tooltipY + yOffset);
+            yOffset += 15;
+            c.fillText(`Fire Rate: ${(1000 / hoveredBuilding.fireRate).toFixed(2)} shots/s`, tooltipX + 8, tooltipY + yOffset);
+            if (isNewSuperSeedTower) {
+                const multiplier = hoveredBuilding.level === 1 ? 2 : hoveredBuilding.level === 2 ? 3 : 4;
+                yOffset += 15;
+                c.fillText(`Coin Multiplier: ${multiplier}x`, tooltipX + 8, tooltipY + yOffset);
+            }
             c.textAlign = 'start';
-
-            if (waveNotificationTimer >= waveNotificationDuration) {
-                waveNotification = null;
-                waveNotificationTimer = 0;
-                console.log('Wave notification hidden');
-            }
         }
 
-        animationFrameId = requestAnimationFrame(animate);
+        const currentTime = Date.now();
+        var timeSinceLastWave = currentTime - lastWaveTime;
+        survivalTime = Math.floor((currentTime - startTime) / 1000);
+        const timerElement = document.querySelector('#timer');
+        if (timerElement) timerElement.innerHTML = leaderboard.formatTime(survivalTime);
+
+        if (timeSinceLastWave >= waveInterval) {
+            totalWaveCount++;
+
+            if (waveNumber >= 12 && !isBossWaveNext && !isNeverEndingWave) {
+                if (isBossWaveNext) {
+                    spawnBoss();
+                    isBossWaveNext = false;
+                } else {
+                    waveNumber++;
+                    const enemyCount = calculateEnemyCount(waveNumber);
+                    spawnEnemies(enemyCount);
+                    if (waveNumber % 3 === 0) {
+                        isBossWaveNext = true;
+                    }
+                }
+
+                if (waveNumber > 12 && !isBossWaveNext) {
+                    isNeverEndingWave = true;
+                    waveNotification = "Never-Ending Wave! Survive as long as you can!";
+                    waveNotificationTimer = 0;
+                    console.log("Starting never-ending wave after Boss4");
+                }
+            } else if (!isNeverEndingWave) {
+                if (isBossWaveNext) {
+                    spawnBoss();
+                    isBossWaveNext = false;
+                } else {
+                    waveNumber++;
+                    const enemyCount = calculateEnemyCount(waveNumber);
+                    spawnEnemies(enemyCount);
+                    if (waveNumber % 3 === 0) {
+                        isBossWaveNext = true;
+                    }
+                }
+            }
+
+            lastWaveTime = currentTime;
+            console.log(`Wave interval: ${waveInterval / 1000} seconds, Time since last wave: ${timeSinceLastWave / 1000} seconds`);
+        }
+
+        if (isNeverEndingWave) {
+            neverEndingSpawnTimer += deltaTime * 1000;
+            if (neverEndingSpawnTimer >= neverEndingSpawnInterval) {
+                const enemy = spawnEndlessEnemies();
+                if (enemy) {
+                    enemies.push(enemy);
+                    enemies.sort((a, b) => a.position.y - b.position.y);
+                }
+                neverEndingSpawnTimer = 0;
+            }
+        }
+    } else {
+        enemies.forEach(enemy => {
+            enemy.draw();
+        });
+
+        buildings.forEach(building => {
+            building.draw();
+            building.projectiles.forEach(projectile => {
+                projectile.draw();
+            });
+        });
+
+        c.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        c.fillRect(0, 0, canvas.width, canvas.height);
     }
+
+    if (waveNotification) {
+        waveNotificationTimer += deltaTime * 1000;
+
+        const remainingTime = waveNotificationDuration - waveNotificationTimer;
+        const fadeDuration = 500;
+        const opacity = remainingTime < fadeDuration ? remainingTime / fadeDuration : 1;
+
+        c.fillStyle = `rgba(0, 0, 0, ${0.8 * opacity})`;
+        c.fillRect(canvas.width / 2 - 150, canvas.height / 2 - 30, 300, 60);
+        c.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        c.font = '30px Changa One';
+        c.textAlign = 'center';
+        c.fillText(waveNotification, canvas.width / 2, canvas.height / 2 + 10);
+        c.textAlign = 'start';
+
+        if (waveNotificationTimer >= waveNotificationDuration) {
+            waveNotification = null;
+            waveNotificationTimer = 0;
+            console.log('Wave notification hidden');
+        }
+    }
+
+    animationFrameId = requestAnimationFrame(animate);
+}
 
     const mouse = {
         x: undefined,

@@ -95,51 +95,51 @@ const Boss4Images = [];
 
 for (let i = 0; i < 7; i++) {
     const enemyK1Img = new Image();
-    enemyK1Img.src = `img/_K1_WALK_00${i}.png`;
+    enemyK1Img.src = `img/K1_WALK_00${i}.png`;
     enemyK1Images.push(enemyK1Img);
 
     const enemyK2Img = new Image();
-    enemyK2Img.src = `img/_K2_WALK_00${i}.png`;
+    enemyK2Img.src = `img/K2_WALK_00${i}.png`;
     enemyK2Images.push(enemyK2Img);
 
     const enemyK3Img = new Image();
-    enemyK3Img.src = `img/_K3_WALK_00${i}.png`;
+    enemyK3Img.src = `img/K3_WALK_00${i}.png`;
     enemyK3Images.push(enemyK3Img);
 
     const enemyK4Img = new Image();
-    enemyK4Img.src = `img/_K4_WALK_00${i}.png`;
+    enemyK4Img.src = `img/K4_WALK_00${i}.png`;
     enemyK4Images.push(enemyK4Img);
 
     const enemyK5Img = new Image();
-    enemyK5Img.src = `img/_K5_WALK_00${i}.png`;
+    enemyK5Img.src = `img/K5_WALK_00${i}.png`;
     enemyK5Images.push(enemyK5Img);
 
     const enemyK6Img = new Image();
-    enemyK6Img.src = `img/_K6_WALK_00${i}.png`;
+    enemyK6Img.src = `img/K6_WALK_00${i}.png`;
     enemyK6Images.push(enemyK6Img);
 
     const enemyK7Img = new Image();
-    enemyK7Img.src = `img/_K7_WALK_00${i}.png`;
+    enemyK7Img.src = `img/K7_WALK_00${i}.png`;
     enemyK7Images.push(enemyK7Img);
 
     const enemyK8Img = new Image();
-    enemyK8Img.src = `img/_K8_WALK_00${i}.png`;
+    enemyK8Img.src = `img/K8_WALK_00${i}.png`;
     enemyK8Images.push(enemyK8Img);
 
     const enemyK9Img = new Image();
-    enemyK9Img.src = `img/_K9_WALK_00${i}.png`;
+    enemyK9Img.src = `img/K9_WALK_00${i}.png`;
     enemyK9Images.push(enemyK9Img);
 
     const enemyK10Img = new Image();
-    enemyK10Img.src = `img/_K10_WALK_00${i}.png`;
+    enemyK10Img.src = `img/K10_WALK_00${i}.png`;
     enemyK10Images.push(enemyK10Img);
 
     const enemyK11Img = new Image();
-    enemyK11Img.src = `img/_K11_WALK_00${i}.png`;
+    enemyK11Img.src = `img/K11_WALK_00${i}.png`;
     enemyK11Images.push(enemyK11Img);
 
     const enemyK12Img = new Image();
-    enemyK12Img.src = `img/_K12_WALK_00${i}.png`;
+    enemyK12Img.src = `img/K12_WALK_00${i}.png`;
     enemyK12Images.push(enemyK12Img);
 }
 

@@ -141,96 +141,96 @@
 }
 class EnemyK1 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K1_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K1_WALK_', enemyType });
     }
 }
 
 class EnemyK2 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K2_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K2_WALK_', enemyType });
     }
 }
 
 class EnemyK3 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K3_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K3_WALK_', enemyType });
     }
 }
 
 class EnemyK4 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K4_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K4_WALK_', enemyType });
     }
 }
 
 class EnemyK5 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K5_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K5_WALK_', enemyType });
     }
 }
 
 class EnemyK6 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K6_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K6_WALK_', enemyType });
     }
 }
 
 class EnemyK7 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K7_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K7_WALK_', enemyType });
     }
 }
 
 class EnemyK8 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K8_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K8_WALK_', enemyType });
     }
 }
 
 class EnemyK9 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K9_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K9_WALK_', enemyType });
     }
 }
 
 class EnemyK10 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K10_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K10_WALK_', enemyType });
     }
 }
 
 class EnemyK11 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K11_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K11_WALK_', enemyType });
     }
 }
 
 class EnemyK12 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_K12_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'K12_WALK_', enemyType });
     }
 }
 
 class Boss1 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_Boss1_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'Boss1_WALK_', enemyType });
     }
 }
 
 class Boss2 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_Boss2_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'Boss2_WALK_', enemyType });
     }
 }
 
 class Boss3 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_Boss3_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'Boss3_WALK_', enemyType });
     }
 }
 
 class Boss4 extends Enemy {
     constructor({ position = { x: 0, y: 0 }, waveNumber = 0, enemyType }) {
-        super({ position, waveNumber, imageNamePrefix: '_Boss4_WALK_', enemyType });
+        super({ position, waveNumber, imageNamePrefix: 'Boss4_WALK_', enemyType });
     }
 }
